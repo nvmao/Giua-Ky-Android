@@ -13,10 +13,22 @@
         tools:layout_editor_absoluteX="134dp"
         tools:layout_editor_absoluteY="193dp">
 
-        <com.google.android.material.textfield.TextInputEditText
-            android:id="@+id/SearchEdt"
+        <LinearLayout
             android:layout_width="match_parent"
-            android:layout_height="wrap_content" />
+            android:layout_height="wrap_content"
+            android:orientation="horizontal">
+
+            <com.google.android.material.textfield.TextInputEditText
+                android:id="@+id/SearchEdt"
+                android:layout_width="285dp"
+                android:layout_height="match_parent" />
+
+            <Button
+                android:id="@+id/BtnSearch"
+                android:layout_width="125dp"
+                android:layout_height="match_parent"
+                android:text="Search" />
+        </LinearLayout>
 
         <LinearLayout
             android:layout_width="match_parent"
@@ -25,8 +37,10 @@
 
             <ImageView
                 android:id="@+id/imageView"
-                android:layout_width="146dp"
-                android:layout_height="match_parent"
+                android:layout_width="145dp"
+                android:layout_height="174dp"
+                android:scaleType="centerCrop"
+                android:src="@drawable/traicay"
                 tools:src="@tools:sample/avatars" />
 
             <LinearLayout
@@ -42,7 +56,7 @@
                     <com.google.android.material.textfield.TextInputEditText
                         android:id="@+id/EdtProductName"
                         android:layout_width="match_parent"
-                        android:layout_height="wrap_content"
+                        android:layout_height="57dp"
                         android:hint="Product name" />
 
                     <com.google.android.material.textfield.TextInputEditText
