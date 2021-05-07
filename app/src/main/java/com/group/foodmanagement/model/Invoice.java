@@ -67,6 +67,9 @@ public class Invoice {
     public String getStatus() {
         return status;
     }
+    public void setStatus(String stats){
+        this.status = stats;
+    }
 
     @Override
     public String toString() {

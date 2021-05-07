@@ -22,8 +22,10 @@ import com.group.foodmanagement.adapter.InvoiceGridAdapter;
 import com.group.foodmanagement.adapter.ProductGridAdapter;
 import com.group.foodmanagement.model.Invoice;
 import com.group.foodmanagement.model.Product;
+import com.group.foodmanagement.model.User;
 import com.group.foodmanagement.repository.InvoiceRepository;
 import com.group.foodmanagement.repository.ProductRepository;
+import com.group.foodmanagement.repository.UserRepository;
 import com.group.foodmanagement.ui.login.LoginActivity;
 
 import java.util.List;
@@ -32,6 +34,7 @@ public class InvoicesFragment extends Fragment {
 
     private InvoicesViewModel invoicesViewModel;
     GridView gridView;
+    User user;
 
     public View onCreateView(@NonNull LayoutInflater inflater,
                              ViewGroup container, Bundle savedInstanceState) {
@@ -40,7 +43,7 @@ public class InvoicesFragment extends Fragment {
         View root = inflater.inflate(R.layout.fragment_invoices, container, false);
 
         InvoiceRepository db = new InvoiceRepository(getActivity());
-        List<Invoice> invoices = db.getInvoicesByUser("mao");
+        List<Invoice> invoices = db.getInvoicesByUser(UserRepository.getLoginUser().getUsername());
 
         gridView = (GridView) root.findViewById(R.id.invoiceGridView);
         InvoiceGridAdapter ad = new InvoiceGridAdapter(getActivity().getApplicationContext(),invoices);
@@ -52,7 +55,7 @@ public class InvoicesFragment extends Fragment {
     @Override
     public void onResume() {
         InvoiceRepository db = new InvoiceRepository(getActivity());
-        List<Invoice> invoices = db.getInvoicesByUser("mao");
+        List<Invoice> invoices = db.getInvoicesByUser(UserRepository.getLoginUser().getUsername());
         InvoiceGridAdapter ad = new InvoiceGridAdapter(getActivity().getApplicationContext(),invoices);
         gridView.setAdapter(ad);
 

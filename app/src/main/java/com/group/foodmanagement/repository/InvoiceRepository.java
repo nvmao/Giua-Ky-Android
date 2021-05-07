@@ -68,6 +68,7 @@ public class InvoiceRepository extends SQLiteOpenHelper {
         db.close();
     }
 
+
     // code to get the single contact
     public Invoice getInvoice(int id) {
         SQLiteDatabase db = this.getReadableDatabase();
@@ -127,15 +128,16 @@ public class InvoiceRepository extends SQLiteOpenHelper {
         // looping through all rows and adding to list
         if (cursor.moveToFirst()) {
             do {
-                Invoice invoice = new Invoice();
-                invoice.setId(Integer.parseInt(cursor.getString(0)));
-                invoice.setCreated_at(cursor.getString(1));
-                invoice.setCreated_by(cursor.getString(2));
 
-                // get list detail
+                if(cursor.getString(2).equals(username) &&  cursor.getString(3).equals("OK")){
+                    Invoice invoice = new Invoice();
+                    invoice.setId(Integer.parseInt(cursor.getString(0)));
+                    invoice.setCreated_at(cursor.getString(1));
+                    invoice.setCreated_by(cursor.getString(2));
 
-                // Adding contact to list
-                invoiceList.add(invoice);
+                    invoiceList.add(invoice);
+                }
+
             } while (cursor.moveToNext());
         }
 
@@ -144,17 +146,18 @@ public class InvoiceRepository extends SQLiteOpenHelper {
     }
 
 //    // code to update the single contact
-//    public int updateContact(Contact contact) {
-//        SQLiteDatabase db = this.getWritableDatabase();
-//
-//        ContentValues values = new ContentValues();
-//        values.put(KEY_NAME, contact.getName());
-//        values.put(KEY_PH_NO, contact.getPhoneNumber());
-//
-//        // updating row
-//        return db.update(TABLE_CONTACTS, values, KEY_ID + " = ?",
-//                new String[] { String.valueOf(contact.getID()) });
-//    }
+    public int updateInvoice(Invoice invoice) {
+        SQLiteDatabase db = this.getWritableDatabase();
+
+        ContentValues values = new ContentValues();
+        values.put(KEY_CREATED_AT, invoice.getCreated_at());
+        values.put(KEY_CREATED_BY, invoice.getCreated_by());
+        values.put(KEY_STATUS,invoice.getStatus());
+
+        // updating row
+        return db.update(TABLE, values, KEY_ID + " = ?",
+                new String[] { String.valueOf(invoice.getId()) });
+    }
 //
 //    // Deleting single contact
 //    public void deleteContact(Contact contact) {

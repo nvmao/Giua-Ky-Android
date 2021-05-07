@@ -2,6 +2,7 @@ package com.group.foodmanagement.ui.invoices;
 
 import android.app.Activity;
 import android.content.Intent;
+import android.graphics.Color;
 import android.os.Build;
 import android.os.Bundle;
 import android.view.View;
@@ -21,6 +22,7 @@ import com.group.foodmanagement.model.Product;
 import com.group.foodmanagement.repository.InvoiceDetailRepository;
 import com.group.foodmanagement.repository.InvoiceRepository;
 import com.group.foodmanagement.repository.ProductRepository;
+import com.group.foodmanagement.repository.UserRepository;
 
 import java.time.format.DateTimeFormatter;
 import java.time.LocalDateTime;
@@ -68,6 +70,30 @@ public class AddInvoiceActivity extends AppCompatActivity {
 
         addInvoiceDetailBtn.setVisibility(View.INVISIBLE);
         createInvoiceBtn.setText("Canceled this invoice");
+        createInvoiceBtn.setBackgroundColor(Color.argb(100,150,20,20));
+
+        createInvoiceBtn.setOnClickListener(new View.OnClickListener() {
+            @RequiresApi(api = Build.VERSION_CODES.O)
+            public void onClick(View v) {
+
+                invoice.setStatus("CANCELED");
+
+                InvoiceRepository invoiceRepository = new InvoiceRepository(getApplicationContext());
+                invoiceRepository.updateInvoice(invoice);
+
+                ProductRepository productRepository = new ProductRepository(getApplicationContext());
+
+                for(InvoiceDetail detail : invoiceDetails){
+                    Product product = productRepository.getProduct(detail.getProductId());
+                    product.setInStock(product.getInStock() + detail.getCount());
+
+                    productRepository.updateProduct(product);
+                }
+
+                setResult(Activity.RESULT_OK);
+                finish();
+            }
+        });
 
 
         TextView productIdText = findViewById(R.id.productIdText);
@@ -85,7 +111,6 @@ public class AddInvoiceActivity extends AppCompatActivity {
         if(detailsDb.size() > 0){
             for(InvoiceDetail detail: detailsDb){
                 Product product = productRepository.getProduct(detail.getProductId());
-
                 int productBuyCount = detail.getCount();
 
                 InvoiceDetail detailItem = new InvoiceDetail(product.getId(),productBuyCount,product);
@@ -127,8 +152,18 @@ public class AddInvoiceActivity extends AppCompatActivity {
                 int productBuyCount = Integer.parseInt(productCountText.getText().toString());
 
                 if(product != null && productBuyCount <= product.getInStock()){
-                    InvoiceDetail detail = new InvoiceDetail(product.getId(),productBuyCount,product);
-                    invoiceDetails.add(detail);
+
+                    int existDetail = isExistDetail(product.getId());
+                    if(existDetail != -1){
+                        if(productBuyCount + invoiceDetails.get(existDetail).getCount() < invoiceDetails.get(existDetail).getProduct().getInStock()){
+                            productBuyCount = productBuyCount + invoiceDetails.get(existDetail).getCount();
+                            invoiceDetails.get(existDetail).setCount(productBuyCount);
+                        }
+                    }
+                    else {
+                        InvoiceDetail detail = new InvoiceDetail(product.getId(),productBuyCount,product);
+                        invoiceDetails.add(detail);
+                    }
 
                     InvoiceDetailGridAdapter ad = new InvoiceDetailGridAdapter(getApplicationContext(),invoiceDetails);
                     ad.setGridView(gridView);
@@ -145,7 +180,7 @@ public class AddInvoiceActivity extends AppCompatActivity {
                     return;
                 }
 
-                invoice.setCreated_by("mao");
+                invoice.setCreated_by(UserRepository.getLoginUser().getUsername());
                 invoice.setCreated_at(dtf.format(now));
 
                 InvoiceRepository invoiceRepository = new InvoiceRepository(getApplicationContext());
@@ -154,13 +189,16 @@ public class AddInvoiceActivity extends AppCompatActivity {
                 Invoice addedInvoice = invoiceRepository.getLastInvoice();
                 if(addedInvoice != null){
                     InvoiceDetailRepository invoiceDetailRepository = new InvoiceDetailRepository(getApplicationContext());
+                    ProductRepository productRepository = new ProductRepository(getApplicationContext());
 
                     for(InvoiceDetail detail : invoiceDetails){
                         detail.setInvoiceId(addedInvoice.getId());
-                        invoiceDetailRepository.addInvoiceDetail(detail);
-                    }
+                        Product product = productRepository.getProduct(detail.getProductId());
+                        product.setInStock(product.getInStock() - detail.getCount());
 
-                    System.out.println("added: " + invoiceDetails.size() +" details -- " + invoice.getId());
+                        invoiceDetailRepository.addInvoiceDetail(detail);
+                        productRepository.updateProduct(product);
+                    }
 
                     setResult(Activity.RESULT_OK);
                     finish();
@@ -168,6 +206,15 @@ public class AddInvoiceActivity extends AppCompatActivity {
             }
         });
 
+    }
+
+    int isExistDetail(int productId){
+        for(int i =0 ;i < invoiceDetails.size();i++){
+            if(invoiceDetails.get(i).getProduct().getId() == productId){
+                return i;
+            }
+        }
+        return -1;
     }
 
     @Override

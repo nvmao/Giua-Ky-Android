@@ -23,6 +23,8 @@ import android.widget.TextView;
 import android.widget.Toast;
 
 import com.group.foodmanagement.R;
+import com.group.foodmanagement.model.User;
+import com.group.foodmanagement.repository.UserRepository;
 
 public class LoginActivity extends AppCompatActivity {
 
@@ -36,6 +38,8 @@ public class LoginActivity extends AppCompatActivity {
         final Button loginButton = findViewById(R.id.login);
         final ProgressBar loadingProgressBar = findViewById(R.id.loading);
 
+        usernameEditText.setText("mao");
+        passwordEditText.setText("1");
 
         loginButton.setEnabled(true);
 
@@ -43,12 +47,32 @@ public class LoginActivity extends AppCompatActivity {
             @Override
             public void onClick(View v) {
                 loadingProgressBar.setVisibility(View.VISIBLE);
-                if(usernameEditText.getText().toString().equals("mao") &&
-                    passwordEditText.getText().toString().equals("1")){
+
+                User user = UserRepository.login(usernameEditText.getText().toString(),passwordEditText.getText().toString());
+
+                if(user != null){
                     updateUiWithUser();
 
                     setResult(Activity.RESULT_OK);
                     finish();
+                }
+                else{
+                    loadingProgressBar.setVisibility(View.INVISIBLE);
+
+                    final float currentX = loginButton.getX();
+
+                    loginButton.animate().x(loginButton.getX() + 200).setDuration(200).withEndAction(new Runnable() {
+                        @Override
+                        public void run() {
+                            loginButton.animate().x(loginButton.getX() - 400).setDuration(200).withEndAction(new Runnable() {
+                                @Override
+                                public void run() {
+                                    loginButton.animate().x(currentX).setDuration(200);
+                                }
+                            });
+                        }
+                    });
+
                 }
             }
         });
