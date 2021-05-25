@@ -1,6 +1,7 @@
 package com.group.foodmanagement.ui.products;
 
 import android.content.Context;
+import android.widget.Toast;
 
 import com.group.foodmanagement.model.BestSelling;
 import com.group.foodmanagement.model.Invoice;
@@ -55,6 +56,29 @@ public class BestSellingProduct {
 
         return products;
     }
+
+    public List<BestSelling> topFiveWithMonth(String month){
+        for (Invoice invoice : invoices){
+            String create_at = invoice.getCreated_at().toString();
+            String sub_month = create_at.substring(5,7);
+            int month1 = Integer.parseInt(month);
+            int month2 = Integer.parseInt(sub_month);
+            if(month1 == month2) {
+                for (InvoiceDetail invoiceDetail : invoice.getInvoiceDetails()) {
+                    int existProductId = existProduct(invoiceDetail.getProduct().getId());
+                    if (existProductId != -1) {
+                        int prevCount = products.get(existProductId).getCount();
+                        products.get(existProductId).setCount(prevCount + invoiceDetail.getCount());
+                    } else {
+                        products.add(new BestSelling(invoiceDetail.getProduct(), invoiceDetail.getCount()));
+                    }
+                }
+            }
+        }
+
+        return products;
+    }
+
 
     int existProduct(int id){
         for (int i = 0 ; i < products.size();i++){

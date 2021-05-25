@@ -6,9 +6,12 @@ import android.graphics.Color;
 import android.os.Build;
 import android.os.Bundle;
 import android.view.View;
+import android.widget.ArrayAdapter;
 import android.widget.Button;
 import android.widget.GridView;
+import android.widget.Spinner;
 import android.widget.TextView;
+import android.widget.Toast;
 
 import androidx.annotation.RequiresApi;
 import androidx.appcompat.app.AppCompatActivity;
@@ -28,6 +31,7 @@ import java.time.format.DateTimeFormatter;
 import java.time.LocalDateTime;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Map;
 
 public class AddInvoiceActivity extends AppCompatActivity {
 
@@ -96,7 +100,7 @@ public class AddInvoiceActivity extends AppCompatActivity {
         });
 
 
-        TextView productIdText = findViewById(R.id.productIdText);
+        Spinner productIdText = findViewById(R.id.productIdText);
         TextView productCountText = findViewById(R.id.productCountText);
         productIdText.setVisibility(View.INVISIBLE);
         productCountText.setVisibility(View.INVISIBLE);
@@ -140,14 +144,28 @@ public class AddInvoiceActivity extends AppCompatActivity {
         Button addInvoiceDetailBtn = findViewById(R.id.addInvoiceDetailBtn);
         Button createInvoiceBtn = findViewById(R.id.createDoneInvoiceBtn);
 
+        ProductRepository productRepository = new ProductRepository(getApplicationContext());
+        final Spinner spinner = (Spinner) findViewById(R.id.productIdText);
+
+        final List<String> list= productRepository.getAllProduct();
+        List<String> listNameProduct = new ArrayList<String>();
+        for(int i = 0 ; i < list.size() ; i++)
+        {
+            String[] filter = list.get(i).split("_");
+            listNameProduct.add(filter[1]);
+        }
+        ArrayAdapter<String> dataAdapter = new ArrayAdapter<String>(this, android.R.layout.simple_spinner_item,listNameProduct);
+        dataAdapter.setDropDownViewResource(android.R.layout.simple_spinner_dropdown_item);
+        spinner.setAdapter(dataAdapter);
+
         addInvoiceDetailBtn.setOnClickListener(new View.OnClickListener() {
             public void onClick(View v) {
-                TextView productIdText = findViewById(R.id.productIdText);
+                ProductRepository productRepository = new ProductRepository(getApplicationContext());
                 TextView productCountText = findViewById(R.id.productCountText);
 
-
-                ProductRepository productRepository = new ProductRepository(getApplicationContext());
-                Product product = productRepository.getProduct(Integer.parseInt(productIdText.getText().toString()));
+                int pos = spinner.getSelectedItemPosition();
+                String[] fit = list.get(pos).split("_");
+                Product product = productRepository.getProduct(Integer.parseInt(fit[0]));
 
                 int productBuyCount = Integer.parseInt(productCountText.getText().toString());
 

@@ -1,26 +1,29 @@
 package com.group.foodmanagement.ui.products;
 
+import android.Manifest;
 import android.app.Activity;
 import android.content.Intent;
+import android.net.Uri;
 import android.os.Build;
 import android.os.Bundle;
 import android.view.View;
 import android.widget.AdapterView;
 import android.widget.ArrayAdapter;
 import android.widget.Button;
-import android.widget.EditText;
 import android.widget.ImageView;
-import android.widget.ProgressBar;
 import android.widget.Spinner;
 import android.widget.TextView;
+import android.widget.Toast;
 
 import androidx.annotation.RequiresApi;
 import androidx.appcompat.app.AppCompatActivity;
+import androidx.recyclerview.widget.GridLayoutManager;
+import androidx.recyclerview.widget.RecyclerView;
 
 import com.group.foodmanagement.R;
 import com.group.foodmanagement.model.Product;
-import com.group.foodmanagement.repository.InvoiceRepository;
 import com.group.foodmanagement.repository.ProductRepository;
+
 
 import java.util.ArrayList;
 import java.util.Hashtable;
@@ -28,10 +31,13 @@ import java.util.List;
 import java.util.Map;
 import java.util.function.BiConsumer;
 
+
+
 public class AddProductActivity extends AppCompatActivity {
 
     Product product;
     Map<String,Integer> imageMap;
+
 
     @RequiresApi(api = Build.VERSION_CODES.N)
     @Override
@@ -54,6 +60,8 @@ public class AddProductActivity extends AppCompatActivity {
             System.out.println("create");
         }
     }
+
+
 
     @RequiresApi(api = Build.VERSION_CODES.N)
     void initUpdate(){
@@ -130,6 +138,7 @@ public class AddProductActivity extends AppCompatActivity {
                 String name = nameText.getText().toString();
                 float price = Float.parseFloat (priceText.getText().toString());
                 int imageId = imageMap.get(spinner.getSelectedItem());
+
                 int inStock = Integer.parseInt(inStockText.getText().toString());
 
                 product.setName(name);

@@ -9,7 +9,9 @@ import android.database.sqlite.SQLiteOpenHelper;
 import com.group.foodmanagement.model.Product;
 
 import java.util.ArrayList;
+import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
 
 public class ProductRepository extends SQLiteOpenHelper {
     private static final int DATABASE_VERSION = 1;
@@ -95,6 +97,26 @@ public class ProductRepository extends SQLiteOpenHelper {
     }
 
     // code to get all contacts in a list view
+    public List<String> getAllProduct()
+    {
+        List<String> productList = new ArrayList<>();
+        String selectQuery = "SELECT  * FROM " + TABLE_PRODUCTS;
+
+        SQLiteDatabase db = this.getWritableDatabase();
+        Cursor cursor = db.rawQuery(selectQuery, null);
+        if (cursor.moveToFirst()) {
+            do {
+
+                String id =cursor.getString(0);
+                String name = cursor.getString(2);
+                String stat = id+"_"+name;
+                productList.add(stat);
+
+
+            } while (cursor.moveToNext());
+        }
+        return productList;
+    }
     public List<Product> getAllProducts() {
 
 

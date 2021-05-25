@@ -42,13 +42,13 @@ public class MainActivity extends AppCompatActivity {
         Intent myIntent = new Intent(MainActivity.this, LoginActivity.class);
         MainActivity.this.startActivity(myIntent);
 
-//        ProductRepository productRepository = new ProductRepository(getApplicationContext());
-//        InvoiceRepository invoiceRepository = new InvoiceRepository(getApplicationContext());
-//        InvoiceDetailRepository invoiceDetailRepository = new InvoiceDetailRepository(getApplicationContext());
+        ProductRepository productRepository = new ProductRepository(getApplicationContext());
+        InvoiceRepository invoiceRepository = new InvoiceRepository(getApplicationContext());
+        InvoiceDetailRepository invoiceDetailRepository = new InvoiceDetailRepository(getApplicationContext());
 //
-//        productRepository.reset();
-//        invoiceRepository.reset();
-//        invoiceDetailRepository.reset();
+       //productRepository.reset();
+        //invoiceRepository.reset();
+       //invoiceDetailRepository.reset();
 
     }
 
