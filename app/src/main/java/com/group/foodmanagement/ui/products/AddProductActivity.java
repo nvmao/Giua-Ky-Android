@@ -1,7 +1,10 @@
 package com.group.foodmanagement.ui.products;
 
+import android.Manifest;
+import android.annotation.SuppressLint;
 import android.app.Activity;
 import android.content.Intent;
+import android.content.pm.PackageManager;
 import android.os.Build;
 import android.os.Bundle;
 import android.view.View;
@@ -13,15 +16,20 @@ import android.widget.ImageView;
 import android.widget.ProgressBar;
 import android.widget.Spinner;
 import android.widget.TextView;
+import android.widget.Toast;
 
+import androidx.annotation.NonNull;
+import androidx.annotation.Nullable;
 import androidx.annotation.RequiresApi;
 import androidx.appcompat.app.AppCompatActivity;
 
+import com.group.foodmanagement.MainActivity;
 import com.group.foodmanagement.R;
 import com.group.foodmanagement.model.Product;
 import com.group.foodmanagement.repository.InvoiceRepository;
 import com.group.foodmanagement.repository.ProductRepository;
 
+import java.security.PrivateKey;
 import java.util.ArrayList;
 import java.util.Hashtable;
 import java.util.List;
@@ -32,13 +40,15 @@ public class AddProductActivity extends AppCompatActivity {
 
     Product product;
     Map<String,Integer> imageMap;
-
+        ImageView  productImage;
+    private static final int IMAGE_PICK_CODE=1000;
+    private static final int PERMISSION_CODE=1001;
     @RequiresApi(api = Build.VERSION_CODES.N)
     @Override
     public void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_add_product);
-        this.initImageMap();
+
 
         Intent intent = getIntent();
         int invoice_id = intent.getIntExtra("product_id",0);
@@ -57,12 +67,13 @@ public class AddProductActivity extends AppCompatActivity {
 
     @RequiresApi(api = Build.VERSION_CODES.N)
     void initUpdate(){
+        Button chooseImageBtn =findViewById(R.id.chooseImgBtn);
         Button addBtn = findViewById(R.id.addBtn);
 
         final Spinner spinner = (Spinner) findViewById(R.id.imageIdSpiner);
         final ImageView productImage = findViewById(R.id.imageProductView);
 
-        // Spinner click listener
+
         spinner.setOnItemSelectedListener(new AdapterView.OnItemSelectedListener() {
             @Override
             public void onItemSelected(AdapterView<?> adapterView, View view, int i, long l) {
@@ -101,23 +112,9 @@ public class AddProductActivity extends AppCompatActivity {
         inStockText.setText(String.valueOf(product.getInStock()));
 
 
-        ArrayAdapter<String> dataAdapter = new ArrayAdapter<String>(this, android.R.layout.simple_spinner_item, categories);
-        dataAdapter.setDropDownViewResource(android.R.layout.simple_spinner_dropdown_item);
-        spinner.setAdapter(dataAdapter);
 
-        imageMap.forEach(new BiConsumer<String, Integer>() {
-            @Override
-            public void accept(String s, Integer integer) {
-                if(integer == product.getImageId()){
-                    productImage.setImageResource(imageMap.get(s));
-                    for(int i = 0 ; i < categories.size();i++){
-                        if(categories.get(i).equals(s)){
-                            spinner.setSelection(i);
-                        }
-                    }
-                }
-            }
-        });
+
+
 
         addBtn.setOnClickListener(new View.OnClickListener() {
             public void onClick(View v) {
@@ -129,7 +126,7 @@ public class AddProductActivity extends AppCompatActivity {
 
                 String name = nameText.getText().toString();
                 float price = Float.parseFloat (priceText.getText().toString());
-                int imageId = imageMap.get(spinner.getSelectedItem());
+                int imageId = productImage.getId();
                 int inStock = Integer.parseInt(inStockText.getText().toString());
 
                 product.setName(name);
@@ -147,50 +144,36 @@ public class AddProductActivity extends AppCompatActivity {
 
     void initCreate(){
         Button addBtn = findViewById(R.id.addBtn);
-
+Button chooseImageBtn =findViewById(R.id.chooseImgBtn);
         final Spinner spinner = (Spinner) findViewById(R.id.imageIdSpiner);
-        final ImageView productImage = findViewById(R.id.imageProductView);
+
+        productImage = findViewById(R.id.imageProductView);
 
         // Spinner click listener
-        spinner.setOnItemSelectedListener(new AdapterView.OnItemSelectedListener() {
+       chooseImageBtn.setOnClickListener(new View.OnClickListener(){
             @Override
-            public void onItemSelected(AdapterView<?> adapterView, View view, int i, long l) {
-                String item = adapterView.getItemAtPosition(i).toString();
-                productImage.setImageResource(imageMap.get(item));
+            public void onClick(View v) {
+                if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.M) {
+                    if (checkSelfPermission(Manifest.permission.READ_EXTERNAL_STORAGE) == PackageManager.PERMISSION_DENIED) {
+                        String[] permission = {Manifest.permission.READ_EXTERNAL_STORAGE};
+                        requestPermissions(permission, PERMISSION_CODE);
+                    } else {
+                        pickImageFromGallery();
+                    }
+                } else {
+                    pickImageFromGallery();
+                }
             }
+                });
+        // Spinner click listener
 
-            @Override
-            public void onNothingSelected(AdapterView<?> adapterView) {
 
-            }
-        });
-
-        // Spinner Drop down elements
-        List<String> categories = new ArrayList<String>();
-        categories.add("breach");
-        categories.add("nui");
-        categories.add("food1");
-        categories.add("food2");
-        categories.add("pasta");
-        categories.add("perry");
-        categories.add("pizza");
-        categories.add("taco");
-        categories.add("tor");
-        categories.add("chanh");
-        categories.add("mcdonal");
-
-        productImage.setImageResource(imageMap.get("breach"));
 
 
 
         // Creating adapter for spinner
-        ArrayAdapter<String> dataAdapter = new ArrayAdapter<String>(this, android.R.layout.simple_spinner_item, categories);
 
         // Drop down layout style - list view with radio button
-        dataAdapter.setDropDownViewResource(android.R.layout.simple_spinner_dropdown_item);
-
-        // attaching data adapter to spinner
-        spinner.setAdapter(dataAdapter);
 
         addBtn.setOnClickListener(new View.OnClickListener() {
             public void onClick(View v) {
@@ -215,25 +198,37 @@ public class AddProductActivity extends AppCompatActivity {
         });
     }
 
-    void initImageMap(){
-        this.imageMap = new Hashtable<>();
-        imageMap.put("breach",R.drawable.banh);
-        imageMap.put("nui",R.drawable.nui);
-        imageMap.put("food1",R.drawable.food);
-        imageMap.put("food2",R.drawable.food2);
-        imageMap.put("pasta",R.drawable.pasta);
-        imageMap.put("perry",R.drawable.perry);
-        imageMap.put("pizza",R.drawable.pizza);
-        imageMap.put("taco",R.drawable.taco);
-        imageMap.put("tor",R.drawable.tor);
-        imageMap.put("chanh",R.drawable.chanh);
-        imageMap.put("mcdonal",R.drawable.mcdonal);
-    }
+
 
     @Override
     public void onBackPressed() {
         setResult(Activity.RESULT_OK);
         finish();
     }
+private void pickImageFromGallery() {
+Intent intent=new Intent(Intent.ACTION_PICK);
+intent.setType("image/*");
+startActivityForResult(intent,IMAGE_PICK_CODE);
+    }
+    @Override
+    public void onRequestPermissionsResult(int requestCode, @NonNull String[] permissions, @NonNull int[] grantResults){
+            switch (requestCode) {
+                case PERMISSION_CODE: {
+                    if (grantResults.length > 0 && grantResults[0] == PackageManager.PERMISSION_GRANTED) {
+                        pickImageFromGallery();
+                    } else {
+                        Toast.makeText(this, "Permission denied...", Toast.LENGTH_SHORT).show();
+                    }
+                }
+            }
+        }
 
+    @SuppressLint("MissingSuperCall")
+    @Override
+    protected void onActivityResult(int requestCode, int resultCode, @Nullable Intent data) {
+        if (resultCode == RESULT_OK && requestCode == IMAGE_PICK_CODE) {
+            productImage.setImageURI(data.getData());
+
+        }
+    }
 }
